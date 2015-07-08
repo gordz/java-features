@@ -16,12 +16,15 @@
  * 
  * If you extend an interface with a default method, you can either
  * - redefine it
- * - redeclare it as a regular method on the interface
+ * - redeclare it as a regular method on the interface, to be implemented by child classes/child implementations/
  * - do nothing (which will inherit the default method from the interface being extended)
  * 
+ * If the default method is overidden in a class, then that version will be used.
  * 
- * Reasons to do this:
- * 	TODO
+ * Class (implementation) overrides are chosen over default methods.
+ * 
+ * If you implement (or extend) multiple interfaces that have the same default method, you must either override the method, 
+ * or choose to invoke one of the parent default methods using the super keyword.
  * 
  * https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html
  * 
@@ -60,8 +63,31 @@ interface RedeclaredDefault extends WithDefault {
 }
 
 interface OverrideDefault extends WithDefault {
+	@Override
 	default void doSomething() {
 		System.out.println("do something overidden");
+	}
+}
+
+// Default method collission - 2 interfaces with the same default method will cause a compile error - we need to specify
+// which version to call using the super keyword, override the method, or declare as a regular method to be implemnted by 
+// any classes that implement the interface.
+interface Child {
+	default void talk() {
+		System.out.println("Child talk()");
+	}
+}
+
+interface Parent {
+	default void talk() {
+		System.out.println("Parent talk");
+	}
+}
+
+// Refering to a specific implementation of the default method usign the Super keyword.
+interface Sibilng extends Child, Parent {
+	default void talk() {
+		Child.super.talk();
 	}
 }
 

@@ -3,8 +3,10 @@ import static java.util.stream.Collectors.toSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -34,6 +36,62 @@ public class LambdaBookExercises {
 		return numbers.reduce(0, (a, b) -> a + b);
 	}
 	
+	
+	// Ch3 ex 1b
+	private List<String> retrieveNameAndPlaceOfOrigin(List<Artist> artists) {
+		List<String> result = artists.stream()
+				.flatMap(a -> Stream.of(a.getName(), a.getPlaceOfOrigin()))
+				.collect(Collectors.toList());
+		return result;
+	}
+	
+	// Ch3 ex 1c.
+	private List<Album> filterByMaximumThreeTracks(List<Album> albums) {
+		return albums.stream()
+			.filter(a -> a.getTracks().size() <= 3)
+			.collect(Collectors.toList());
+	}
+	
+	
+	// Ch3 ex 2.
+	private void externalIterationToInternalIteration() {
+	
+		List<Artist> artists = null;
+		
+		// External iteration.
+		int totalMembers = 0;
+		for (Artist artist : artists) {
+			Stream<Artist> members = artist.getMembers();
+			totalMembers += members.count();
+		}
+			
+		// Use flatmap to get the members (a function that takes an obejct, and returns a stream).
+		int totalMembersInternal = (int)artists.stream().flatMap(a -> a.getMembers()).count();
+		
+		// Suggested method
+		int totalMembersCorrectAnswer = artists.stream()
+				.map(a -> a.getMembers().count())
+				.reduce(0L, Long::sum)
+				.intValue();
+	}
+	
+	// Ch3 ex 6
+	private long lowerCaseChars(String string) {
+		return string.chars().filter(Character::isLowerCase).count();
+	}
+	
+	// Ch3 ex 7 
+	private Optional<String> largestNumberOfLowercaseChars(Stream<String> strings) {
+		return strings.reduce((acc, next) -> {
+			return lowerCaseChars(acc) > lowerCaseChars(next) ? acc : next;
+		});
+	}
+	
+	// Ch3 ex 7 - best practice (and suggested answer - using a comparator and max).
+	public Optional<String> largestNumberOfLowerChars(Stream<String> strings) {
+		return strings.max(Comparator.comparing(this::lowerCaseChars));
+	}
+	
 	static class Album {
 		private List<Track> trackList;
 
@@ -42,6 +100,30 @@ public class LambdaBookExercises {
 		}
 	}
 	
+	static class Artist {
+		private final String name;
+		private final String placeOfOrigin;
+		private List<Artist> members;
+		
+		public Artist(String name, String placeOfOrigin) {
+			super();
+			this.name = name;
+			this.placeOfOrigin = placeOfOrigin;
+		}
+
+		public String getName() {
+			return name;
+		}
+		
+		public Stream<Artist> getMembers() {
+			return members.stream();
+		}
+
+		public String getPlaceOfOrigin() {
+			return placeOfOrigin;
+		}
+		
+	}
 	
 	
 	@Test
