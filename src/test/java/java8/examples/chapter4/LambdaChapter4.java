@@ -5,7 +5,9 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.Test;
@@ -65,5 +67,66 @@ public class LambdaChapter4 {
 		List<Artist> allMusiciansPerforming = performance.getAllMusiciansPerforming().collect(toList());
 		
 		assertThat(allMusiciansPerforming, containsInAnyOrder(solo1, solo2, group, groupArtist1, groupArtist2));
+	}
+	
+	@Test
+	public void ex3() {
+		class Artists {
+			private List<Artist> artists;
+			
+			public Artists(List<Artist> artists) {
+				this.artists = artists;
+			}
+			
+			public Artist getArtist(int index) {
+				if (index < 0 || index >= artists.size()) {
+					indexException(index);
+				}
+				return artists.get(index);
+			}
+			
+			private void indexException(int index) {
+				throw new IllegalArgumentException(index +
+						" doesn't correspond to an Artist");
+			}
+
+			public String getArtistName(int index) {
+				try {
+					Artist artist = getArtist(index);
+					return artist.getName();
+				} catch (IllegalArgumentException e) {
+					return "unknown";
+				}
+			}
+		}
+		
+		class ArtistsRefactoredOptional {
+			private List<Artist> artists;
+			
+			public ArtistsRefactoredOptional(List<Artist> artists) {
+				this.artists = artists;
+			}
+			
+			public Optional<Artist> getArtist(int index) {
+				if (index < 0 || index >= artists.size()) {
+					indexException(index);
+				}
+				return artists.get(index);
+			}
+
+			public String getArtistName(int index) {
+				try {
+					Artist artist = getArtist(index);
+					return artist.getName();
+				} catch (IllegalArgumentException e) {
+					return "unknown";
+				}
+			}
+		}
+		
+		ArtistsRefactoredOptional artistsEmpty = new ArtistsRefactoredOptional(Collections.emptyList());
+		assertThat(artistsEmpty.getArtist(-1).isPresent(), equalTo(false));
+		assertThat(artistsEmpty.getArtists(0).isPresent(), equalTo(false));
+		
 	}
 }
